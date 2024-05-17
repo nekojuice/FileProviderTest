@@ -95,7 +95,7 @@ namespace FileProviderTest.Controllers
         /// <param name="fileList"></param>
         /// <returns></returns>
         [HttpPost]
-        public async Task<IResult> UploadMulitImage(List<IFormFile> fileList)
+        public async Task<IResult> UploadMultiImage(List<IFormFile> fileList)
         {
             if (fileList == null || fileList.Count == 0) { return Results.BadRequest(); }
             try
