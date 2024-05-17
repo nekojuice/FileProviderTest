@@ -22,6 +22,7 @@ namespace FileProviderTest.Controllers
 
         /// <summary>
         /// 取得貓咪圖檔 by id
+        /// 限定png
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
@@ -43,6 +44,7 @@ namespace FileProviderTest.Controllers
 
         /// <summary>
         /// 取得任何圖檔 by filename
+        /// 限定png
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
@@ -60,19 +62,23 @@ namespace FileProviderTest.Controllers
             }
         }
 
-
+        /// <summary>
+        /// 上傳檔案
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<IResult> UploadImage(IFormFile image)
+        public async Task<IResult> UploadImage(IFormFile file)
         {
-            if (image == null || string.IsNullOrEmpty(image.FileName)) { return Results.BadRequest(); }
+            if (file == null || string.IsNullOrEmpty(file.FileName)) { return Results.BadRequest(); }
 
-            var path = Path.Combine(Directory.GetCurrentDirectory(), "File/", image.FileName);
+            var path = Path.Combine(Directory.GetCurrentDirectory(), "File/", file.FileName);
 
             try
             {
                 using (FileStream stream = new FileStream(path, FileMode.Create))
                 {
-                    await image.CopyToAsync(stream);
+                    await file.CopyToAsync(stream);
                     stream.Close();
                 }
                 return Results.Ok(new { message = "上傳成功" });
@@ -82,13 +88,19 @@ namespace FileProviderTest.Controllers
                 return Results.BadRequest(new { message = "上傳失敗" });
             }
         }
+
+        /// <summary>
+        /// 上傳多個檔案
+        /// </summary>
+        /// <param name="fileList"></param>
+        /// <returns></returns>
         [HttpPost]
-        public async Task<IResult> UploadMulitImage(List<IFormFile> imageList)
+        public async Task<IResult> UploadMulitImage(List<IFormFile> fileList)
         {
-            if (imageList == null || imageList.Count == 0) { return Results.BadRequest(); }
+            if (fileList == null || fileList.Count == 0) { return Results.BadRequest(); }
             try
             {
-                foreach (var item in imageList)
+                foreach (var item in fileList)
                 {
                     var path = Path.Combine(Directory.GetCurrentDirectory(), "File/", item.FileName);
 
@@ -125,13 +137,13 @@ namespace FileProviderTest.Controllers
         /// <summary>
         /// 上傳檔案 限制大小
         /// </summary>
-        /// <param name="image"></param>
+        /// <param name="file"></param>
         /// <returns></returns>
         [RequestFormLimits(MultipartBodyLengthLimit = 51200)] // 50 kb
         [HttpPost]
-        public async Task<IResult> UploadImageLimitSize(IFormFile image)
+        public async Task<IResult> UploadImageLimitSize(IFormFile file)
         {
-            return await UploadImage(image);
+            return await UploadImage(file);
         }
 
     }
