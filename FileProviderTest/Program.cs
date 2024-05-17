@@ -11,7 +11,7 @@ builder.Services.AddSwaggerGen();
 
 // fileprovider
 //builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory() + "/wwwroot"));
-builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory() + "/catimages/"));
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory() + "/File/"));
 
 var app = builder.Build();
 
