@@ -1,6 +1,8 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.FileProviders;
+using System.Linq;
+using System.Net.Mime;
 using System.Reflection;
 
 namespace FileProviderTest.Controllers
@@ -10,9 +12,19 @@ namespace FileProviderTest.Controllers
     public class CatImageController : ControllerBase
     {
         private readonly IFileProvider _fileProvider;
+        private readonly static string[] _allowImageContentTypes =
+            ["image/png",
+            "image/jpeg",
+            "image/jpeg",
+            "image/gif"];
+
         public CatImageController(IFileProvider fileProvider) => _fileProvider = fileProvider;
 
-
+        /// <summary>
+        /// 取得貓咪圖檔 by id
+        /// </summary>
+        /// <param name="id"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("{id}")]
         public IActionResult GetCat([FromRoute] string id)
@@ -29,6 +41,11 @@ namespace FileProviderTest.Controllers
 
         }
 
+        /// <summary>
+        /// 取得任何圖檔 by filename
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult GetImage([FromQuery] string name)
         {
@@ -43,12 +60,6 @@ namespace FileProviderTest.Controllers
             }
         }
 
-        [RequestFormLimits(MultipartBodyLengthLimit = 51200)] // 50 kb
-        [HttpPost]
-        public async Task<IResult> UploadImageLimitSize(IFormFile image)
-        {
-            return await UploadImage(image);
-        }
 
         [HttpPost]
         public async Task<IResult> UploadImage(IFormFile image)
@@ -71,7 +82,6 @@ namespace FileProviderTest.Controllers
                 return Results.BadRequest(new { message = "上傳失敗" });
             }
         }
-
         [HttpPost]
         public async Task<IResult> UploadMulitImage(List<IFormFile> imageList)
         {
@@ -95,5 +105,34 @@ namespace FileProviderTest.Controllers
                 return Results.BadRequest(new { message = "上傳時發生錯誤" });
             }
         }
+
+
+        /// <summary>
+        /// 上傳檔案 限制是圖檔
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        [HttpPost]
+        public async Task<IResult> UploadImageLimitContentType(IFormFile image)
+        {
+            if (!_allowImageContentTypes.Contains(image.ContentType))
+            {
+                return Results.BadRequest(new { message = "格式不符" });
+            }
+            return await UploadImage(image);
+        }
+
+        /// <summary>
+        /// 上傳檔案 限制大小
+        /// </summary>
+        /// <param name="image"></param>
+        /// <returns></returns>
+        [RequestFormLimits(MultipartBodyLengthLimit = 51200)] // 50 kb
+        [HttpPost]
+        public async Task<IResult> UploadImageLimitSize(IFormFile image)
+        {
+            return await UploadImage(image);
+        }
+
     }
 }
