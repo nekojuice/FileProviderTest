@@ -7,7 +7,17 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Content Include="catimages\cat1.png" />
+    <Content Include="catimages\cat2.png" />
+    <Content Include="catimages\cat3.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="wwwroot\images\" />
   </ItemGroup>
 
 </Project>
