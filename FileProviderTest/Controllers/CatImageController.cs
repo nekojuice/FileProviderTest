@@ -64,7 +64,31 @@ namespace FileProviderTest.Controllers
             {
                 return BadRequest(new { message = "上傳失敗" });
             }
+        }
 
+        [HttpPost]
+        public async Task<IActionResult> UploadMulitImage(List<IFormFile> imageList)
+        {
+            if (imageList == null || imageList.Count == 0) { return BadRequest(); }
+            try
+            {
+                foreach (var item in imageList)
+                {
+                    var path = Path.Combine(Directory.GetCurrentDirectory(), "File/", item.FileName);
+
+                    using (FileStream stream = new FileStream(path, FileMode.Create))
+                    {
+                        await item.CopyToAsync(stream);
+                        stream.Close();
+                    }
+
+                }
+                return Ok(new { message = "上傳多個檔案成功" });
+            }
+            catch (Exception)
+            {
+                return BadRequest(new { message = "上傳時發生錯誤" });
+            }
         }
     }
 }
