@@ -1,3 +1,4 @@
+using FileProviderTest.Provider;
 using Microsoft.Extensions.FileProviders;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,7 +12,9 @@ builder.Services.AddSwaggerGen();
 
 // fileprovider
 //builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory() + "/wwwroot"));
-builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Directory.GetCurrentDirectory() + "/File/"));
+builder.Services.AddSingleton<IFileProvider>(new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), "File")));
+
+builder.Services.AddSingleton(new CatImageProvider(Path.Combine(Directory.GetCurrentDirectory(), "Animals")));
 
 var app = builder.Build();
 

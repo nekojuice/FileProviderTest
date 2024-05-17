@@ -4,6 +4,8 @@ using Microsoft.Extensions.FileProviders;
 using System.Linq;
 using System.Net.Mime;
 using System.Reflection;
+using System.IO.Compression;
+using FileProviderTest.Provider;
 
 namespace FileProviderTest.Controllers
 {
@@ -12,13 +14,54 @@ namespace FileProviderTest.Controllers
     public class CatImageController : ControllerBase
     {
         private readonly IFileProvider _fileProvider;
+        private readonly IFileProvider _catProvider;
         private readonly static string[] _allowImageContentTypes =
             ["image/png",
             "image/jpeg",
             "image/jpeg",
             "image/gif"];
+        private readonly static Dictionary<string, string> _contentType = new Dictionary<string, string>();
 
-        public CatImageController(IFileProvider fileProvider) => _fileProvider = fileProvider;
+
+        public CatImageController(IFileProvider fileProvider, CatImageProvider catImageProvider)
+        {
+            _fileProvider = fileProvider;
+            _catProvider = catImageProvider;
+        }
+
+        // 自訂一個 Provider，搜尋 cat
+        // 不小心做了太多有的沒的
+        [HttpGet]
+        public IActionResult DownloadAllCatZip(string fileName)
+        {
+            var directoryContents = _catProvider.GetDirectoryContents("Cat");
+            var file = directoryContents.Where(x => x.Name.StartsWith(fileName));
+            if (file.Count() == 0)
+            {
+                return NotFound();
+            }
+
+            // 壓成 zip，才可回傳多檔案
+            var zipName = $"TestFiles-{DateTime.Now.ToString("yyyy_MM_dd-HH_mm_ss")}.zip";
+            using (MemoryStream memoryStream = new MemoryStream())
+            {
+                //required: using System.IO.Compression;  
+                using (var zip = new ZipArchive(memoryStream, ZipArchiveMode.Create, true))
+                {
+                    //QUery the Products table and get all image content  
+                    foreach (var item in file)
+                    {
+                        var entry = zip.CreateEntry(item.Name);
+                        using (var fileStream = item.CreateReadStream())
+                        using (var entryStream = entry.Open())
+                        {
+                            fileStream.CopyTo(entryStream);
+                        }
+                    };
+                }
+                return File(memoryStream.ToArray(), "application/zip", zipName);
+            }
+        }
 
         /// <summary>
         /// 取得貓咪圖檔 by id

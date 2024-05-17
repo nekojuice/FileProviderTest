@@ -7,9 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="File\cat1.png" />
-    <Content Include="File\cat2.png" />
-    <Content Include="File\cat3.png" />
+    <Content Include="Animals\Cat\cat1.png" />
+    <Content Include="Animals\Cat\cat2.png" />
+    <Content Include="Animals\Cat\cat3.png" />
   </ItemGroup>
 
   <ItemGroup>
