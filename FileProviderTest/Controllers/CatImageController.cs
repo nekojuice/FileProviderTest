@@ -30,8 +30,7 @@ namespace FileProviderTest.Controllers
         }
 
         [HttpGet]
-        [Route("{name}")]
-        public IActionResult GetImage([FromRoute] string name)
+        public IActionResult GetImage([FromQuery] string name)
         {
             try
             {
@@ -44,10 +43,17 @@ namespace FileProviderTest.Controllers
             }
         }
 
+        [RequestFormLimits(MultipartBodyLengthLimit = 51200)] // 50 kb
         [HttpPost]
-        public async Task<IActionResult> UploadImage(IFormFile image)
+        public async Task<IResult> UploadImageLimitSize(IFormFile image)
         {
-            if (image == null || string.IsNullOrEmpty(image.FileName)) { return BadRequest(); }
+            return await UploadImage(image);
+        }
+
+        [HttpPost]
+        public async Task<IResult> UploadImage(IFormFile image)
+        {
+            if (image == null || string.IsNullOrEmpty(image.FileName)) { return Results.BadRequest(); }
 
             var path = Path.Combine(Directory.GetCurrentDirectory(), "File/", image.FileName);
 
@@ -58,18 +64,18 @@ namespace FileProviderTest.Controllers
                     await image.CopyToAsync(stream);
                     stream.Close();
                 }
-                return Ok(new { message = "上傳成功" });
+                return Results.Ok(new { message = "上傳成功" });
             }
             catch (Exception)
             {
-                return BadRequest(new { message = "上傳失敗" });
+                return Results.BadRequest(new { message = "上傳失敗" });
             }
         }
 
         [HttpPost]
-        public async Task<IActionResult> UploadMulitImage(List<IFormFile> imageList)
+        public async Task<IResult> UploadMulitImage(List<IFormFile> imageList)
         {
-            if (imageList == null || imageList.Count == 0) { return BadRequest(); }
+            if (imageList == null || imageList.Count == 0) { return Results.BadRequest(); }
             try
             {
                 foreach (var item in imageList)
@@ -81,13 +87,12 @@ namespace FileProviderTest.Controllers
                         await item.CopyToAsync(stream);
                         stream.Close();
                     }
-
                 }
-                return Ok(new { message = "上傳多個檔案成功" });
+                return Results.Ok(new { message = "上傳多個檔案成功" });
             }
             catch (Exception)
             {
-                return BadRequest(new { message = "上傳時發生錯誤" });
+                return Results.BadRequest(new { message = "上傳時發生錯誤" });
             }
         }
     }
